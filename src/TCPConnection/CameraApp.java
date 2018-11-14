@@ -69,8 +69,7 @@ public class CameraApp {
         
         BluetoothManager bt = new BluetoothManager();
         bt.start();
-        //connectCommand();
-        //new Thread(new PhotoClient()).start;   
+        System.out.println("Hello from main");  
     }
 
     public static void connectCommand() {

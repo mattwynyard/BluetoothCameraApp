@@ -1,7 +1,6 @@
 package Bluetooth;
 
 import javax.bluetooth.BluetoothStateException;
-//import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.DiscoveryListener;
@@ -20,12 +19,15 @@ public class BluetoothManager implements DiscoveryListener {
 	private LocalDevice mLocalDevice;
 	private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
-	//private BluetoothManager bluetoothManager = new BluetoothManager();
-	private static Object lock=new Object();
+	final Object lock = new Object();
+//	final Object serviceSearchCompletedEvent = new Object();
+//	final Object inquiryCompletedEvent = new Object();
 	//vector containing the devices discovered
 	private static Vector<RemoteDevice> mDevices = new Vector();
 	private static String connectionURL = null;
 	//int[] attrIds = { 0x0100 };
+	
+	
 	
 	public BluetoothManager() {
 		
@@ -36,15 +38,17 @@ public class BluetoothManager implements DiscoveryListener {
 		}		
 	}
 	
+	
+	
 	public void start() throws IOException {
 	
 		System.out.println("Local Bluetooth Address: " + mLocalDevice.getBluetoothAddress());
 		System.out.println("Name: " + mLocalDevice.getFriendlyName());
 		
-		//get devices
+		//get discovery agent
 		mAgent = mLocalDevice.getDiscoveryAgent();
+		//Limited Dedicated Inquiry Access Code (LIAC)
 		mAgent.startInquiry(DiscoveryAgent.LIAC, this);
-		//SampleSPPClient client=new SampleSPPClient();
 		
 		try {
 			synchronized(lock){
@@ -72,13 +76,18 @@ public class BluetoothManager implements DiscoveryListener {
 				if (remoteDevice.getFriendlyName(true).equals("OnSite_BLT_Adapter")) {
 					mRemoteDevice = (RemoteDevice) mDevices.elementAt(i);
 					connect(mRemoteDevice, mAgent, this);
-					
-					//System.out.println("Attempting connection to: "+ remoteDevice.getFriendlyName(true));
+
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Called when a remote device OnSite_BLT_Adapter is found. Searches for service on that device to connect to.
+	 * @param remoteDevice - the Onsite Bluetooth Adapter
+	 * @param agent - local devices discovery agent
+	 * @param client - this
+	 */
 	public void connect(RemoteDevice remoteDevice, DiscoveryAgent agent, BluetoothManager client) {
 		
 		UUID[] uuidSet = new UUID[1];
@@ -87,24 +96,41 @@ public class BluetoothManager implements DiscoveryListener {
         System.out.println("\nSearching for service...");
         
         try {
-			agent.searchServices(attrIds, uuidSet, remoteDevice, client);
+//        	synchronized(serviceSearchCompletedEvent) {
+//        		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
+//        		//serviceSearchCompletedEvent.wait();
+//        		serviceSearchCompletedEvent.wait();
+//        	}
+        	synchronized(lock) {
+        		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
+        		//serviceSearchCompletedEvent.wait();
+        		lock.wait();
+        	}
 		} catch (BluetoothStateException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
-//        if(connectionURL == null){
-//            System.out.println("Device does not support Simple SPP Service.");
-//            System.exit(0);
-//        }
+        if(connectionURL == null){
+            System.out.println("Device does not support Simple SPP Service.");
+            System.exit(0);
+        }
 
         //connect to the server and send a line of text
         
 		
 	}
 	
+	//BLUECOVE CALLBACKS
+	
 	/**
 	 * This call back method will be called for each discovered bluetooth devices.
+	 * Each device added to device vector.
+	 * @param btDevice - The Remote Device discovered.
+	 * @param cod - The class of device record. Contains information on the bluetooth device.
+	 * 
 	 */
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
 		System.out.println("Device discovered: "+ btDevice.getBluetoothAddress());
@@ -115,34 +141,72 @@ public class BluetoothManager implements DiscoveryListener {
 
 	}
 	
-	//Need to implement this method since services are being discovered
+	/**
+	 * This callback with be called when services found by DiscoveryListener during service search
+	 * @param - transID: the transaction ID of the service search that is posting the result.
+	 * @param - servRecord: a list of services found during the search request.
+	 */
 		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
 
 			System.out.println("Service discovered");
 			System.out.println(servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false));
+			//URL needed for connection to android bluetooth server
 			connectionURL = servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
 			
-			try {
-				StreamConnection streamConnection = (StreamConnection) Connector.open(connectionURL);
-				if (streamConnection != null) {
-					System.out.println("Connection succesful...");
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			//Creates client running on new thread on specified url
+			SPPClient client = new SPPClient(connectionURL);
+			client.start();
 
-	        synchronized(lock){
-	            lock.notify();
-	        }
+//	        synchronized(serviceSearchCompletedEvent) {
+//	        	try {
+//					serviceSearchCompletedEvent.wait();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//	        }
 			
 		}
 
-		//Need to implement this method since services are not being discovered
+		/**
+		 * Called when service search completed
+		 * @param - transID - the transaction ID identifying the request which initiated the service search
+		 * @param - respCode - the response code that indicates the status of the transaction
+		 */
 		public void serviceSearchCompleted(int transID, int respCode) {
-			synchronized(lock){
-	            lock.notify();
-	        }
+			//System.out.println("service search completed!");
+
+//			synchronized(serviceSearchCompletedEvent) {
+//                serviceSearchCompletedEvent.notifyAll();
+//            }
+			synchronized(lock) {
+				lock.notifyAll();
+			}
+			switch (respCode) {
+			case DiscoveryListener.SERVICE_SEARCH_COMPLETED:
+				System.out.println("SERVICE_SEARCH_COMPLETED");
+				break;
+		
+			case DiscoveryListener.SERVICE_SEARCH_TERMINATED:
+				System.out.println("SERVICE_SEARCH_TERMINATED");
+				break;
+		
+			case DiscoveryListener.SERVICE_SEARCH_ERROR:
+				System.out.println("SERVICE_SEARCH_ERROR");
+				break;
+				
+			case DiscoveryListener.SERVICE_SEARCH_NO_RECORDS:
+				System.out.println("SERVICE_SEARCH_NO_RECORDS");
+				break;
+				
+			case DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE:
+				System.out.println("SERVICE_SEARCH_DEVICE_NOT_REACHABLE");
+				break;
+		
+			default :
+				System.out.println("Unknown Response Code");
+				break;
+			}
 		}
 
 
@@ -152,9 +216,8 @@ public class BluetoothManager implements DiscoveryListener {
 	 */
 	public void inquiryCompleted(int discType) {
 		synchronized(lock){
-			lock.notify();
+			lock.notifyAll();
 		}
-	
 		switch (discType) {
 		case DiscoveryListener.INQUIRY_COMPLETED :
 			System.out.println("INQUIRY_COMPLETED");
