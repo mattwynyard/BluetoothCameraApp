@@ -38,6 +38,16 @@ public class SPPClient extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+    public void sendCommand(String command) {
+        writer.println(command);
+        writer.flush();
+        try {
+            Thread.sleep(200);
+        } catch(Exception ex) {
+            
+        }		
+    }
 
 	public void run() {
 		System.out.println("Hello from thread");
@@ -48,15 +58,10 @@ public class SPPClient extends Thread {
 			out = mStreamConnection.openOutputStream();
 			writer = new PrintWriter(new OutputStreamWriter(out));
 			new Thread(readFromServer).start();
-			writer.write("START");
-			writer.flush();
-			
-	        //os.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}	
 	}
 	/**
      * Runnable that will read from the server on a thread

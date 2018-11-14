@@ -51,47 +51,49 @@ public class CameraApp {
 
     private Scanner sc;
 
-    private static Client mClient;
     private static String ip;
     public static CameraApp App;
     private static boolean connected = false;
     private static boolean recording = false;
 
     private static boolean DEBUG = true;
+    private static String mode;
+    private static BluetoothManager mBluetooth;
     
     public static void main(String[] args) throws IOException {
    	
         App = new CameraApp();
-        if (DEBUG) {
-            System.out.println("starting ADB");
-            App.startAdb();
-        }
+//        if (DEBUG) {
+//            System.out.println("starting ADB");
+//            App.startAdb();
+//        }
         
-        BluetoothManager bt = new BluetoothManager();
-        bt.start();
+        mBluetooth = new BluetoothManager();
+        mBluetooth.start();
+
         System.out.println("Hello from main");  
     }
 
-    public static void connectCommand() {
-        if (connected == true) {
-            return;
-        } else {
-            //get ip address
-            if (!DEBUG) {
-                ArpUtility arp = new ArpUtility();
-                ip = arp.getIPAddress();
-            } else {
-                ip = "127.0.0.1";
-            }
-            //connect to server
-            if (ip != "error") {
-                System.out.println("connecting to: " + ip);
-                mClient = new Client(ip, 38300);
-            } else {
-                setStatusLabel("No Network");
-            }
-        }
-    }
+//    public static void connectCommand() {
+//        if (connected == true) {
+//            return;
+//        } else {
+//            //get ip address
+//            if (!DEBUG) {
+//                ArpUtility arp = new ArpUtility();
+//                ip = arp.getIPAddress();
+//            } else {
+//                ip = "127.0.0.1";
+//            }
+//            //connect to server
+//            if (ip != "error") {
+//                System.out.println("connecting to: " + ip);
+//                mClient = new Client(ip, 38300);
+//            } else {
+//                setStatusLabel("No Network");
+//            }
+//        }
+//    }
 
     public static void setStatusLabel(String label) {
         connected = false;
@@ -119,11 +121,11 @@ public class CameraApp {
         if (connected == true) {
             statusLabel.setText("Connected");
             statusLabel.setForeground(DARK_GREEN);
-            ipLabel.setText(mClient.getIP());
+            //ipLabel.setText(mClient.getIP());
         } else {
             statusLabel.setText("Not Connected");
             statusLabel.setForeground(Color.red);
-            mClient = null;
+            //mClient = null;
             ipLabel.setText("___.___.___.___");
         }
     }
@@ -142,23 +144,26 @@ public class CameraApp {
     private ActionListener startAction = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			mClient.sendStartCommand();
+			//mClient.sendStartCommand();
+			mBluetooth.sendStartCommand();
+			
 		}
 	};
 
 	private ActionListener stopAction = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			mClient.sendStopCommand();
+			//mClient.sendStopCommand();
+			mBluetooth.sendStopCommand();
 		}
     };
 
-    private ActionListener connectAction = new ActionListener(){
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            connectCommand();
-        }
-    };
+//    private ActionListener connectAction = new ActionListener(){
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            connectCommand();
+//        }
+//    };
 
     private static void addComponent(Container container, Component component, int gridx, int gridy,
       int gridwidth, int gridheight, double weightx, double weighty, int anchor, int fill, int ipadx, int ipady) {
@@ -225,7 +230,7 @@ public class CameraApp {
 		
         startButton.addActionListener(startAction);
         stopButton.addActionListener(stopAction);
-        connectButton.addActionListener(connectAction);
+        //connectButton.addActionListener(connectAction);
         
         frame.setSize(480, 180);
         frame.setResizable(false);   
@@ -260,22 +265,22 @@ public class CameraApp {
 //		return sb.toString();
 //    }
     
-    /**
-     * Start the adb bridge
-     */
-    private void startAdb() {
-		try {
-            Process process=Runtime.getRuntime().exec("C:\\and\\platform-tools\\adb.exe forward tcp:38300 tcp:38300");
-			sc = new Scanner(process.getErrorStream());
-			if (sc.hasNext()) 
-			{
-				while (sc.hasNext()) 
-					System.out.print(sc.next()+" ");
-				System.out.println("\nCannot start the Android debug bridge");
-			}
-			sc.close();
-		} catch (IOException ioEx) {
-			System.out.println("\nCannot start the Android debug bridge, IOException");
-		}
-    }
+//    /**
+//     * Start the adb bridge
+//     */
+//    private void startAdb() {
+//		try {
+//            Process process=Runtime.getRuntime().exec("C:\\and\\platform-tools\\adb.exe forward tcp:38300 tcp:38300");
+//			sc = new Scanner(process.getErrorStream());
+//			if (sc.hasNext()) 
+//			{
+//				while (sc.hasNext()) 
+//					System.out.print(sc.next()+" ");
+//				System.out.println("\nCannot start the Android debug bridge");
+//			}
+//			sc.close();
+//		} catch (IOException ioEx) {
+//			System.out.println("\nCannot start the Android debug bridge, IOException");
+//		}
+//    }
 }

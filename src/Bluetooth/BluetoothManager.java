@@ -20,12 +20,10 @@ public class BluetoothManager implements DiscoveryListener {
 	private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
 	final Object lock = new Object();
-//	final Object serviceSearchCompletedEvent = new Object();
-//	final Object inquiryCompletedEvent = new Object();
-	//vector containing the devices discovered
-	private static Vector<RemoteDevice> mDevices = new Vector();
+	private static Vector<RemoteDevice> mDevices = new Vector(); //vector containing the devices discovered
 	private static String connectionURL = null;
-	//int[] attrIds = { 0x0100 };
+	private SPPClient mClient;
+
 	
 	
 	
@@ -38,7 +36,15 @@ public class BluetoothManager implements DiscoveryListener {
 		}		
 	}
 	
+	public void sendStartCommand() {
+		mClient.sendCommand("Start");
+		
+	}
 	
+	public void sendStopCommand() {
+		mClient.sendCommand("Stop");
+		
+	}
 	
 	public void start() throws IOException {
 	
@@ -117,10 +123,6 @@ public class BluetoothManager implements DiscoveryListener {
             System.out.println("Device does not support Simple SPP Service.");
             System.exit(0);
         }
-
-        //connect to the server and send a line of text
-        
-		
 	}
 	
 	//BLUECOVE CALLBACKS
@@ -154,8 +156,9 @@ public class BluetoothManager implements DiscoveryListener {
 			connectionURL = servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
 			
 			//Creates client running on new thread on specified url
-			SPPClient client = new SPPClient(connectionURL);
-			client.start();
+			mClient = new SPPClient(connectionURL);
+			mClient.start();
+			System.out.println("Client started");
 
 //	        synchronized(serviceSearchCompletedEvent) {
 //	        	try {
@@ -236,4 +239,5 @@ public class BluetoothManager implements DiscoveryListener {
 			break;
 		}
 	}//end method
+
 } //end class
