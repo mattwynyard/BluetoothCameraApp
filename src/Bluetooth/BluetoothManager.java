@@ -83,7 +83,7 @@ public class BluetoothManager implements DiscoveryListener {
 				
 				if (remoteDevice.getFriendlyName(true).equals("OnSite_BLT_Adapter")) {
 					mRemoteDevice = (RemoteDevice) mDevices.elementAt(i);
-					//connect(mRemoteDevice, mAgent, this);
+					connect(mRemoteDevice, mAgent, this);
 
 				}
 			}
@@ -106,13 +106,12 @@ public class BluetoothManager implements DiscoveryListener {
         try {
         	synchronized(lock) {
         		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
-        		//serviceSearchCompletedEvent.wait();
+
         		lock.wait();
         	}
 		} catch (BluetoothStateException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         

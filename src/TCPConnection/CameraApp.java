@@ -71,7 +71,7 @@ public class CameraApp {
         mBluetooth = new BluetoothManager();
         mBluetooth.start();
 
-        System.out.println("Hello from main");  
+        //System.out.println("Hello from main");  
     }
 
 //    public static void connectCommand() {
@@ -130,7 +130,7 @@ public class CameraApp {
         }
     }
 
-    public static void isRecording(boolean state) {
+    public static void setRecording(boolean state) {
         recording = state;
         if (recording == true) {
             cameraLabel.setText("Recording");

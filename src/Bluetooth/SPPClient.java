@@ -72,24 +72,25 @@ public class SPPClient extends Thread {
 
                 while ((buffer=reader.readLine())!=null) {
                     if (buffer.toString().contains("NOTRECORDING")) {
-                        CameraApp.isRecording(false);
+                        CameraApp.setRecording(false);
                     } else if (buffer.toString().contains("RECORDING")) {
-                        CameraApp.isRecording(true);
+                        CameraApp.setRecording(true);
                     } else if (buffer.toString().contains("CONNECTED")) {
                         CameraApp.setConnected(true);
                     } else if (buffer.toString().contains("HOME:")) {
                         if (buffer.toString().contains("DESTROYED")) {
                             System.out.println(buffer.toString());
                             CameraApp.setConnected(false);
+                            CameraApp.setRecording(false);
                         }
                     } else if (buffer.toString().contains(".jpg")) {
                         //System.out.println(buffer.toString());
                         CameraApp.setPhotoLabel(buffer.toString().substring(12));
                     } else if (buffer.toString().contains("B:")) {
-                        //System.out.println(buffer.toString());
+                        System.out.println(buffer.toString());
                         CameraApp.setBatteryLabel(buffer.toString().substring(2));
                     } else if (buffer.toString().contains("M:")) {
-                        //System.out.println(buffer.toString());
+                        System.out.println(buffer.toString());
                         CameraApp.setMemoryLabel(buffer.toString().substring(2));
                     } else {
                         System.out.println(buffer.toString());
@@ -98,7 +99,6 @@ public class SPPClient extends Thread {
 
             } catch (IOException e) {
                 try {
-                    //socket.close();
                     in.close();
                 } catch (IOException e1) {
                     e1.printStackTrace();

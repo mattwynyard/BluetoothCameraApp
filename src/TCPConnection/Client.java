@@ -97,9 +97,9 @@ public class Client {
 
                 while ((buffer=in.readLine())!=null) {
                     if (buffer.toString().contains("NOTRECORDING")) {
-                        CameraApp.isRecording(false);
+                        CameraApp.setRecording(false);
                     } else if (buffer.toString().contains("RECORDING")) {
-                        CameraApp.isRecording(true);
+                        CameraApp.setRecording(true);
                     } else if (buffer.toString().contains("CONNECTED")) {
                         CameraApp.setConnected(true);
                     } else if (buffer.toString().contains("HOME:")) {
