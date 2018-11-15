@@ -24,9 +24,6 @@ public class BluetoothManager implements DiscoveryListener {
 	private static String connectionURL = null;
 	private SPPClient mClient;
 
-	
-	
-	
 	public BluetoothManager() {
 		
 		try {	
@@ -43,6 +40,11 @@ public class BluetoothManager implements DiscoveryListener {
 	
 	public void sendStopCommand() {
 		mClient.sendCommand("Stop");
+		
+	}
+	
+	public void connectCommand() {
+		connect(mRemoteDevice, mAgent, this);
 		
 	}
 	
@@ -81,7 +83,7 @@ public class BluetoothManager implements DiscoveryListener {
 				
 				if (remoteDevice.getFriendlyName(true).equals("OnSite_BLT_Adapter")) {
 					mRemoteDevice = (RemoteDevice) mDevices.elementAt(i);
-					connect(mRemoteDevice, mAgent, this);
+					//connect(mRemoteDevice, mAgent, this);
 
 				}
 			}
@@ -102,11 +104,6 @@ public class BluetoothManager implements DiscoveryListener {
         System.out.println("\nSearching for service...");
         
         try {
-//        	synchronized(serviceSearchCompletedEvent) {
-//        		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
-//        		//serviceSearchCompletedEvent.wait();
-//        		serviceSearchCompletedEvent.wait();
-//        	}
         	synchronized(lock) {
         		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
         		//serviceSearchCompletedEvent.wait();
@@ -159,15 +156,6 @@ public class BluetoothManager implements DiscoveryListener {
 			mClient = new SPPClient(connectionURL);
 			mClient.start();
 			System.out.println("Client started");
-
-//	        synchronized(serviceSearchCompletedEvent) {
-//	        	try {
-//					serviceSearchCompletedEvent.wait();
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//	        }
 			
 		}
 
@@ -177,11 +165,7 @@ public class BluetoothManager implements DiscoveryListener {
 		 * @param - respCode - the response code that indicates the status of the transaction
 		 */
 		public void serviceSearchCompleted(int transID, int respCode) {
-			//System.out.println("service search completed!");
 
-//			synchronized(serviceSearchCompletedEvent) {
-//                serviceSearchCompletedEvent.notifyAll();
-//            }
 			synchronized(lock) {
 				lock.notifyAll();
 			}

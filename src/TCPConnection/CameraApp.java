@@ -158,12 +158,12 @@ public class CameraApp {
 		}
     };
 
-//    private ActionListener connectAction = new ActionListener(){
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            connectCommand();
-//        }
-//    };
+    private ActionListener connectAction = new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        	mBluetooth.connectCommand();
+        }
+    };
 
     private static void addComponent(Container container, Component component, int gridx, int gridy,
       int gridwidth, int gridheight, double weightx, double weighty, int anchor, int fill, int ipadx, int ipady) {
@@ -230,7 +230,7 @@ public class CameraApp {
 		
         startButton.addActionListener(startAction);
         stopButton.addActionListener(stopAction);
-        //connectButton.addActionListener(connectAction);
+        connectButton.addActionListener(connectAction);
         
         frame.setSize(480, 180);
         frame.setResizable(false);   

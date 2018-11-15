@@ -23,10 +23,7 @@ public class SPPClient extends Thread {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
-
-	
 	public SPPClient(String connectionURL) {
-		// TODO Auto-generated constructor stub
 		this.connectionURL = connectionURL;
 		try {
 			mStreamConnection = (StreamConnection) Connector.open(connectionURL);
@@ -34,7 +31,6 @@ public class SPPClient extends Thread {
 				connected = true;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -59,7 +55,6 @@ public class SPPClient extends Thread {
 			writer = new PrintWriter(new OutputStreamWriter(out));
 			new Thread(readFromServer).start();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
