@@ -51,7 +51,8 @@ public class SPPClient extends Thread {
 			System.out.println("Connection succesful...");
 		}
 		try {
-			out = mStreamConnection.openOutputStream();
+		    //TODO Error javax.bluetooth.BluetoothConnectionException: Failed to connect; [10048] Only one usage of each socket address (protocol/network address/port) is normally permitted.
+			out = mStreamConnection.openOutputStream(); //can cause null pointer exception in Thread-2
 			writer = new PrintWriter(new OutputStreamWriter(out));
 			new Thread(readFromServer).start();
 		} catch (IOException e) {
@@ -76,11 +77,11 @@ public class SPPClient extends Thread {
                     } else if (buffer.toString().contains("RECORDING")) {
                         CameraApp.setRecording(true);
                     } else if (buffer.toString().contains("CONNECTED")) {
-                        CameraApp.setConnected(true);
+                        CameraApp.setStatus("CONNECTED");
                     } else if (buffer.toString().contains("HOME:")) {
                         if (buffer.toString().contains("DESTROYED")) {
                             System.out.println(buffer.toString());
-                            CameraApp.setConnected(false);
+                            CameraApp.setStatus("NOTCONNECTED");
                             CameraApp.setRecording(false);
                         }
                     } else if (buffer.toString().contains(".jpg")) {

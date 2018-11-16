@@ -55,7 +55,7 @@ public class CameraApp {
     public static CameraApp App;
     private static boolean connected = false;
     private static boolean recording = false;
-
+    private static String status = "Not connected";
     private static boolean DEBUG = true;
     private static String mode;
     private static BluetoothManager mBluetooth;
@@ -63,6 +63,9 @@ public class CameraApp {
     public static void main(String[] args) throws IOException {
    	
         App = new CameraApp();
+
+        mode = "Bluetooth";
+        ipLabel.setText(mode);
 //        if (DEBUG) {
 //            System.out.println("starting ADB");
 //            App.startAdb();
@@ -130,6 +133,25 @@ public class CameraApp {
         }
     }
 
+    public static void setStatus(String state) {
+        status = state;
+        if (status == "CONNECTED") {
+            statusLabel.setText("Connected");
+            statusLabel.setForeground(DARK_GREEN);
+        } else if (status == "NOTCONNECTED") {
+            statusLabel.setText("Not Connected");
+            statusLabel.setForeground(Color.red);
+            ipLabel.setText(mode);
+        } else if (status == "SEARCHING") {
+            statusLabel.setText("Searching...");
+            statusLabel.setForeground(Color.BLUE);
+        } else if (status == "DISCOVERING") {
+            statusLabel.setText("Discovering...");
+            statusLabel.setForeground(Color.BLUE);
+        }
+
+    }
+
     public static void setRecording(boolean state) {
         recording = state;
         if (recording == true) {
@@ -184,7 +206,7 @@ public class CameraApp {
 		//This will center the JFrame in the middle of the screen
         frame.setLocationRelativeTo(null);
     
-        ipText = new JLabel("IP:");
+        ipText = new JLabel("MODE:");
         addComponent(frame, ipText, 0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         statusText = new JLabel("Status:");
         addComponent(frame, statusText, 2, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
@@ -198,7 +220,7 @@ public class CameraApp {
         addComponent(frame, batteryText, 4, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
 
         
-        ipLabel = new JLabel("___.___.___.___");
+        ipLabel = new JLabel(mode);
         addComponent(frame, ipLabel, 1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         statusLabel = new JLabel("Not Connected");
         statusLabel.setForeground(Color.red);

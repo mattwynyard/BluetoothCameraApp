@@ -1,5 +1,7 @@
 package Bluetooth;
 
+import TCPConnection.CameraApp;
+
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -57,7 +59,7 @@ public class BluetoothManager implements DiscoveryListener {
 		mAgent = mLocalDevice.getDiscoveryAgent();
 		//Limited Dedicated Inquiry Access Code (LIAC)
 		mAgent.startInquiry(DiscoveryAgent.LIAC, this);
-		
+		CameraApp.setStatus("DISCOVERING");
 		try {
 			synchronized(lock){
 				lock.wait();
@@ -102,6 +104,7 @@ public class BluetoothManager implements DiscoveryListener {
         uuidSet[0]=new UUID("0003000000001000800000805F9B34FB", false);
         int[] attrIds = { 0x0003 };
         System.out.println("\nSearching for service...");
+		CameraApp.setStatus("SEARCHING");
         
         try {
         	synchronized(lock) {
@@ -153,9 +156,9 @@ public class BluetoothManager implements DiscoveryListener {
 			
 			//Creates client running on new thread on specified url
 			mClient = new SPPClient(connectionURL);
+			CameraApp.setStatus("CONNECTED");
 			mClient.start();
 			System.out.println("Client started");
-			
 		}
 
 		/**
@@ -194,8 +197,6 @@ public class BluetoothManager implements DiscoveryListener {
 				break;
 			}
 		}
-
-
 	/**
 	 * This callback method will be called when the device discovery is
 	 * completed.
