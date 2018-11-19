@@ -55,7 +55,7 @@ public class CameraApp {
     public static CameraApp App;
     private static boolean connected = false;
     private static boolean recording = false;
-    private static String status = "Not connected";
+    private static String status;
     private static boolean DEBUG = true;
     private static String mode;
     private static BluetoothManager mBluetooth;
@@ -133,23 +133,28 @@ public class CameraApp {
         }
     }
 
-    public static void setStatus(String state) {
+    public synchronized static void setStatus(String state) {
         status = state;
-        if (status == "CONNECTED") {
+        if (status.equals("CONNECTED")) {
             statusLabel.setText("Connected");
             statusLabel.setForeground(DARK_GREEN);
-        } else if (status == "NOTCONNECTED") {
+        } else if (status.equals("NOTCONNECTED")) {
             statusLabel.setText("Not Connected");
             statusLabel.setForeground(Color.red);
-            ipLabel.setText(mode);
-        } else if (status == "SEARCHING") {
+            //ipLabel.setText(mode);
+        } else if (status.equals("SEARCHING")) {
             statusLabel.setText("Searching...");
             statusLabel.setForeground(Color.BLUE);
-        } else if (status == "DISCOVERING") {
+        } else if (state.equals("DISCOVERING")) {
             statusLabel.setText("Discovering...");
             statusLabel.setForeground(Color.BLUE);
+        } else if (state.equals("NODEVICES")) {
+            statusLabel.setText("No Devices Found");
+            statusLabel.setForeground(Color.RED);
+        } else {
+            statusLabel.setText(state);
+            statusLabel.setForeground(Color.RED);
         }
-
     }
 
     public static void setRecording(boolean state) {
@@ -166,7 +171,6 @@ public class CameraApp {
     private ActionListener startAction = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			//mClient.sendStartCommand();
 			mBluetooth.sendStartCommand();
 			
 		}
@@ -175,7 +179,6 @@ public class CameraApp {
 	private ActionListener stopAction = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			//mClient.sendStopCommand();
 			mBluetooth.sendStopCommand();
 		}
     };
@@ -183,7 +186,12 @@ public class CameraApp {
     private ActionListener connectAction = new ActionListener(){
         @Override
         public void actionPerformed(ActionEvent e) {
-        	mBluetooth.connectCommand();
+            System.out.println("Status: " + status);
+            if (status.equals("NOTCONNECTED") || status.equals("NODEVICES")) {
+                mBluetooth = null;
+                mBluetooth = new BluetoothManager();
+                mBluetooth.start();
+            }
         }
     };
 
@@ -206,7 +214,7 @@ public class CameraApp {
 		//This will center the JFrame in the middle of the screen
         frame.setLocationRelativeTo(null);
     
-        ipText = new JLabel("MODE:");
+        ipText = new JLabel("Mode:");
         addComponent(frame, ipText, 0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         statusText = new JLabel("Status:");
         addComponent(frame, statusText, 2, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
@@ -220,7 +228,8 @@ public class CameraApp {
         addComponent(frame, batteryText, 4, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
 
         
-        ipLabel = new JLabel(mode);
+        ipLabel = new JLabel();
+        ipLabel.setText(mode);
         addComponent(frame, ipLabel, 1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         statusLabel = new JLabel("Not Connected");
         statusLabel.setForeground(Color.red);

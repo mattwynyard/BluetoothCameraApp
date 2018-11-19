@@ -40,8 +40,8 @@ public class SPPClient extends Thread {
         writer.flush();
         try {
             Thread.sleep(200);
-        } catch(Exception ex) {
-            
+        } catch(Exception e) {
+            e.printStackTrace();
         }		
     }
 
@@ -51,13 +51,17 @@ public class SPPClient extends Thread {
 			System.out.println("Connection succesful...");
 		}
 		try {
-		    //TODO Error javax.bluetooth.BluetoothConnectionException: Failed to connect; [10048] Only one usage of each socket address (protocol/network address/port) is normally permitted.
+		    //TODO Error javax.bluetooth.BluetoothConnectionException: Failed to connect; [10048]
+            // Only one usage of each socket address (protocol/network address/port) is normally permitted.
 			out = mStreamConnection.openOutputStream(); //can cause null pointer exception in Thread-2
 			writer = new PrintWriter(new OutputStreamWriter(out));
 			new Thread(readFromServer).start();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		} catch (NullPointerException e1) {
+		    e1.printStackTrace();
+            System.exit(0);
+        }
 	}
 	/**
      * Runnable that will read from the server on a thread
@@ -72,32 +76,31 @@ public class SPPClient extends Thread {
                 reader = new BufferedReader(new InputStreamReader(in));
 
                 while ((buffer=reader.readLine())!=null) {
-                    if (buffer.toString().contains("NOTRECORDING")) {
+                    if (buffer.contains("NOTRECORDING")) {
                         CameraApp.setRecording(false);
-                    } else if (buffer.toString().contains("RECORDING")) {
+                    } else if (buffer.contains("RECORDING")) {
                         CameraApp.setRecording(true);
-                    } else if (buffer.toString().contains("CONNECTED")) {
+                    } else if (buffer.contains("CONNECTED")) {
                         CameraApp.setStatus("CONNECTED");
-                    } else if (buffer.toString().contains("HOME:")) {
-                        if (buffer.toString().contains("DESTROYED")) {
-                            System.out.println(buffer.toString());
+                    } else if (buffer.contains("HOME:")) {
+                        if (buffer.contains("DESTROYED") || buffer.contains("DETACHED")) {
+                            System.out.println(buffer);
                             CameraApp.setStatus("NOTCONNECTED");
                             CameraApp.setRecording(false);
                         }
-                    } else if (buffer.toString().contains(".jpg")) {
-                        //System.out.println(buffer.toString());
-                        CameraApp.setPhotoLabel(buffer.toString().substring(12));
-                    } else if (buffer.toString().contains("B:")) {
+                    } else if (buffer.contains(".jpg")) {
                         System.out.println(buffer.toString());
-                        CameraApp.setBatteryLabel(buffer.toString().substring(2));
-                    } else if (buffer.toString().contains("M:")) {
-                        System.out.println(buffer.toString());
-                        CameraApp.setMemoryLabel(buffer.toString().substring(2));
+                        CameraApp.setPhotoLabel(buffer.substring(12));
+                    } else if (buffer.contains("B:")) {
+                        System.out.println(buffer);
+                        CameraApp.setBatteryLabel(buffer.substring(2));
+                    } else if (buffer.contains("M:")) {
+                        System.out.println(buffer);
+                        CameraApp.setMemoryLabel(buffer.substring(2));
                     } else {
-                        System.out.println(buffer.toString());
+                        System.out.println(buffer);
                     }   
-                }     
-
+                }
             } catch (IOException e) {
                 try {
                     in.close();
@@ -108,5 +111,4 @@ public class SPPClient extends Thread {
             }
         }
     };
-	
 } //end class
