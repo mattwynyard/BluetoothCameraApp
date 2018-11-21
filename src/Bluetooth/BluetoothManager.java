@@ -21,7 +21,8 @@ public class BluetoothManager implements DiscoveryListener {
 	final Object lock = new Object();
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
-	private static Vector<RemoteDevice> mDevices; //vector containing the devices discovered
+    //vector containing the devices discovered, kept as Vector in case we need to a more remote devices
+	private static Vector<RemoteDevice> mDevices = new Vector();
 	private static String connectionURL = null;
 	private SPPClient mClient;
 
@@ -29,7 +30,7 @@ public class BluetoothManager implements DiscoveryListener {
 		
 		try {	
 			this.mLocalDevice = LocalDevice.getLocalDevice();
-			mDevices = new Vector();
+			mDevices.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		

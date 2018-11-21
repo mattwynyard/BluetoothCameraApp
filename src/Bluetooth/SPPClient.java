@@ -53,7 +53,8 @@ public class SPPClient extends Thread {
 		try {
 		    //TODO Error javax.bluetooth.BluetoothConnectionException: Failed to connect; [10048]
             // Only one usage of each socket address (protocol/network address/port) is normally permitted.
-			out = mStreamConnection.openOutputStream(); //can cause null pointer exception in Thread-2
+            //can cause null pointer exception in Thread-2 if instance of app already running
+			out = mStreamConnection.openOutputStream();
 			writer = new PrintWriter(new OutputStreamWriter(out));
 			new Thread(readFromServer).start();
 		} catch (IOException e) {
