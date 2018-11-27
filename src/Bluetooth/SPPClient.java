@@ -1,3 +1,8 @@
+/**
+ * Copyright 2018 - Onsite Developments
+ * @author Matt Wynyard November 2018
+ */
+
 package Bluetooth;
 
 import java.io.BufferedReader;
@@ -79,10 +84,13 @@ public class SPPClient extends Thread {
                 while ((buffer=reader.readLine())!=null) {
                     if (buffer.contains("NOTRECORDING")) {
                         CameraApp.setRecording(false);
+                        System.out.println(buffer);
                     } else if (buffer.contains("RECORDING")) {
                         CameraApp.setRecording(true);
+                        System.out.println(buffer);
                     } else if (buffer.contains("CONNECTED")) {
                         CameraApp.setStatus("CONNECTED");
+                        System.out.println(buffer);
                     } else if (buffer.contains("HOME:")) {
                         if (buffer.contains("DESTROYED") || buffer.contains("DETACHED")) {
                             System.out.println(buffer);
@@ -90,13 +98,13 @@ public class SPPClient extends Thread {
                             CameraApp.setRecording(false);
                         }
                     } else if (buffer.contains(".jpg")) {
-                        System.out.println(buffer.toString());
+                        //System.out.println(buffer.toString());
                         CameraApp.setPhotoLabel(buffer.substring(12));
                     } else if (buffer.contains("B:")) {
-                        System.out.println(buffer);
+                        //System.out.println(buffer);
                         CameraApp.setBatteryLabel(buffer.substring(2));
                     } else if (buffer.contains("M:")) {
-                        System.out.println(buffer);
+                        //System.out.println(buffer);
                         CameraApp.setMemoryLabel(buffer.substring(2));
                     } else {
                         System.out.println(buffer);

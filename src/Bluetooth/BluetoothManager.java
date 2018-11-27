@@ -1,3 +1,8 @@
+/**
+ * Copyright 2018 - Onsite Developments
+ * @author Matt Wynyard November 2018
+ */
+
 package Bluetooth;
 
 import TCPConnection.CameraApp;
@@ -13,6 +18,7 @@ import java.io.IOException;
 import java.util.Vector;
 import javax.bluetooth.UUID;
 
+
 public class BluetoothManager implements DiscoveryListener {
 	
 	private LocalDevice mLocalDevice;
@@ -26,6 +32,9 @@ public class BluetoothManager implements DiscoveryListener {
 	private static String connectionURL = null;
 	private SPPClient mClient;
 
+	/**
+	 * Class constructor for Bluetooth manager
+	 */
 	public BluetoothManager() {
 		
 		try {	
@@ -35,23 +44,32 @@ public class BluetoothManager implements DiscoveryListener {
 			e.printStackTrace();
 		}		
 	}
-	
+
+	/**
+	 * Sends message 'Start' to Android phone
+	 */
 	public void sendStartCommand() {
 		mClient.sendCommand("Start");
 	}
-	
+	/**
+	 * Sends message 'Stop' to Android phone
+	 */
 	public void sendStopCommand() {
 		mClient.sendCommand("Stop");
 	}
-	
+
+	/**
+	 * Main entry point for Bluetooth manager. Intialises the discovery agent and then searches for bluetooth devices
+	 * Device discovery and connection is handled by the bluecove callbacks.
+	 */
 	public void start() {
 
 		System.out.println("Local Bluetooth Address: " + mLocalDevice.getBluetoothAddress());
 		System.out.println("Name: " + mLocalDevice.getFriendlyName());
+        CameraApp.setStatus("DISCOVERING");
 		try {
 			synchronized (enquiryLock) {
 			//Limited Dedicated Inquiry Access Code (LIAC)
-			CameraApp.setStatus("DISCOVERING");
 			mAgent = mLocalDevice.getDiscoveryAgent();
 			try {
 				mAgent.startInquiry(DiscoveryAgent.LIAC, this);
@@ -97,10 +115,10 @@ public class BluetoothManager implements DiscoveryListener {
         uuidSet[0]=new UUID("0003000000001000800000805F9B34FB", false);
         int[] attrIds = { 0x0003 };
         System.out.println("\nSearching for service...");
-
+        CameraApp.setStatus("SEARCHING");
         try {
         	synchronized(searchLock) {
-				CameraApp.setStatus("SEARCHING");
+
         		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
 				searchLock.wait();
         	}
@@ -141,8 +159,8 @@ public class BluetoothManager implements DiscoveryListener {
 	
 	/**
 	 * This callback will be called when services found by DiscoveryListener during service search
-	 * @param - transID: the transaction ID of the service search that is posting the result.
-	 * @param - servRecord: a list of services found during the search request.
+	 * @param transID - the transaction ID of the service search that is posting the result.
+	 * @param servRecord - a list of services found during the search request.
 	 */
 		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
 			synchronized (lock) {

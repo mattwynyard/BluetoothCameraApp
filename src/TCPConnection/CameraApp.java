@@ -1,27 +1,29 @@
-package TCPConnection;
 /**
-* Main application class for CameraApp 
-* Builds user interface and intialises arp utility class then intialises client class to connect to server
-* @author Matt Wynyard October 2018
-* @version 1.0
-*/
+ * Copyright 2018 - Onsite Developments
+ * @author Matt Wynyard November 2018
+ * @version 0.2
+ */
 
+package TCPConnection;
+
+
+import java.awt.*;
 import java.io.*;
 import java.util.*;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import Bluetooth.BluetoothManager;
 
+/**
+ * Main application class for CameraApp
+ * Builds user interface and intialises a bluetooth connection to Android App via the custom class Bluetooth Manager
+ *
+ *
+ */
 public class CameraApp {
 
     //text labels
@@ -59,6 +61,7 @@ public class CameraApp {
     private static boolean DEBUG = true;
     private static String mode;
     private static BluetoothManager mBluetooth;
+    private static int flag = 0;
     
     public static void main(String[] args) throws IOException {
    	
@@ -73,6 +76,7 @@ public class CameraApp {
         
         mBluetooth = new BluetoothManager();
         mBluetooth.start();
+        new Thread(Flash).start();
 
         //System.out.println("Hello from main");  
     }
@@ -97,6 +101,41 @@ public class CameraApp {
 //            }
 //        }
 //    }
+
+    private static Runnable Flash = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                if (flag == 0 && recording == false) {
+                    cameraLabel.setForeground(Color.YELLOW);
+                    cameraLabel.setBackground(Color.RED);
+                    flag = 1;
+                    try {
+                        Thread.sleep(1000);
+                        System.out.println("Thread sleeping");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else if (flag == 1 && recording == false) {
+                    cameraLabel.setForeground(Color.RED);
+                    cameraLabel.setBackground(Color.YELLOW);
+                    flag = 0;
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+    };
 
     public static void setStatusLabel(String label) {
         connected = false;
@@ -162,9 +201,12 @@ public class CameraApp {
         if (recording == true) {
             cameraLabel.setText("Recording");
             cameraLabel.setForeground(DARK_GREEN);
+            cameraLabel.setOpaque(false);
         } else {
             cameraLabel.setText("Not Recording");
+            cameraLabel.setOpaque(true);
             cameraLabel.setForeground(Color.red);
+            cameraLabel.setBackground(Color.YELLOW);
         }
     }
 
@@ -233,10 +275,14 @@ public class CameraApp {
         addComponent(frame, ipLabel, 1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         statusLabel = new JLabel("Not Connected");
         statusLabel.setForeground(Color.red);
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         //statusLabel.setPreferredSize(new Dimension(120, 20));
         addComponent(frame, statusLabel, 3, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         cameraLabel = new JLabel("Not Recording");
         cameraLabel.setForeground(Color.red);
+//        cameraLabel.setBackground(Color.yellow);
+        cameraLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        cameraLabel.setOpaque(true);
         //cameraLabel.setPreferredSize(new Dimension(80, 20));
         addComponent(frame, cameraLabel, 5, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
         photoLabel = new JLabel("Not available");
