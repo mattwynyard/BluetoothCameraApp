@@ -1,6 +1,7 @@
 /**
  * Copyright 2018 - Onsite Developments
  * @author Matt Wynyard November 2018
+ * @version 0.2
  */
 
 package Bluetooth;
@@ -28,9 +29,12 @@ public class BluetoothManager implements DiscoveryListener {
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
     //vector containing the devices discovered, kept as Vector in case we need to a more remote devices
-	private static Vector<RemoteDevice> mDevices = new Vector();
-	private static String connectionURL = null;
+	private Vector<RemoteDevice> mDevices = new Vector();
+	private String connectionURL = null;
 	private SPPClient mClient;
+
+	private long start;
+	private long stop;
 
 	/**
 	 * Class constructor for Bluetooth manager
@@ -42,7 +46,7 @@ public class BluetoothManager implements DiscoveryListener {
 			mDevices.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	/**
@@ -67,6 +71,9 @@ public class BluetoothManager implements DiscoveryListener {
 		System.out.println("Local Bluetooth Address: " + mLocalDevice.getBluetoothAddress());
 		System.out.println("Name: " + mLocalDevice.getFriendlyName());
         CameraApp.setStatus("DISCOVERING");
+        start = System.currentTimeMillis();
+        //System.out.println(mLocalDevice.getProperty("bluetooth.connected.page"));
+
 		try {
 			synchronized (enquiryLock) {
 			//Limited Dedicated Inquiry Access Code (LIAC)
@@ -75,8 +82,10 @@ public class BluetoothManager implements DiscoveryListener {
 				mAgent.startInquiry(DiscoveryAgent.LIAC, this);
 			} catch (BluetoothStateException e){
 				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			enquiryLock.wait();
+				enquiryLock.wait();
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -113,13 +122,14 @@ public class BluetoothManager implements DiscoveryListener {
 		
 		UUID[] uuidSet = new UUID[1];
         uuidSet[0]=new UUID("0003000000001000800000805F9B34FB", false);
-        int[] attrIds = { 0x0003 };
+        int[] attrIds = { 0x0003 }; //RFCOMM
         System.out.println("\nSearching for service...");
         CameraApp.setStatus("SEARCHING");
         try {
         	synchronized(searchLock) {
 
         		agent.searchServices(attrIds, uuidSet, remoteDevice, client);
+				//System.out.println(agent.selectService(uuidSet[0],  ServiceRecord.NOAUTHENTICATE_NOENCRYPT, true));
 				searchLock.wait();
         	}
 		} catch (BluetoothStateException e) {
@@ -148,13 +158,16 @@ public class BluetoothManager implements DiscoveryListener {
 //		}
 		System.out.println("Device discovered: " + btDevice.getBluetoothAddress());
 		try {
-			if (btDevice.getFriendlyName(true).equals("OnSite_BLT_Adapter")) {
+			if (btDevice.getFriendlyName(false).equals("OnSite_BLT_Adapter")) {
+				System.out.println("Trusted: " + btDevice.isTrustedDevice());
 				connect(btDevice, mAgent, this);
+				mAgent.cancelInquiry(this);
 				mDevices.addElement(btDevice);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return;
 	}
 	
 	/**
@@ -166,7 +179,6 @@ public class BluetoothManager implements DiscoveryListener {
 			synchronized (lock) {
 				lock.notifyAll();
 			}
-
 			System.out.println("Service discovered");
 			System.out.println(servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false));
 			//URL needed for connection to android bluetooth server
@@ -176,6 +188,8 @@ public class BluetoothManager implements DiscoveryListener {
 			mClient = new SPPClient(connectionURL);
 			if (mClient != null) {
 				CameraApp.setStatus("CONNECTED");
+				stop = System.currentTimeMillis();
+				System.out.println("Device discovery: " + ((stop - start)/ 1000) + " s");
 				mClient.start();
 				System.out.println("Client started");
 			}

@@ -1,11 +1,10 @@
 /**
  * Copyright 2018 - Onsite Developments
  * @author Matt Wynyard November 2018
- * @version 0.2
+ * @version 1.1
  */
 
 package TCPConnection;
-
 
 import java.awt.*;
 import java.io.*;
@@ -54,7 +53,8 @@ public class CameraApp {
     private Scanner sc;
 
     private static String ip;
-    public static CameraApp App;
+    //public static final CameraApp App = ;
+    public static final CameraApp App = new CameraApp();
     private static boolean connected = false;
     private static boolean recording = false;
     private static String status;
@@ -64,8 +64,6 @@ public class CameraApp {
     private static int flag = 0;
     
     public static void main(String[] args) throws IOException {
-   	
-        App = new CameraApp();
 
         mode = "Bluetooth";
         ipLabel.setText(mode);
@@ -112,7 +110,7 @@ public class CameraApp {
                     flag = 1;
                     try {
                         Thread.sleep(1000);
-                        System.out.println("Thread sleeping");
+                        //System.out.println("Thread sleeping");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -196,7 +194,7 @@ public class CameraApp {
         }
     }
 
-    public static void setRecording(boolean state) {
+    public synchronized static void setRecording(boolean state) {
         recording = state;
         if (recording == true) {
             cameraLabel.setText("Recording");
@@ -247,8 +245,7 @@ public class CameraApp {
     
 	private CameraApp() {
 
-        JFrame frame = new JFrame();     
-	
+        JFrame frame = new JFrame();
 		//make sure the program exits when the frame closes
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("OnSite Recording Controller");
@@ -269,7 +266,6 @@ public class CameraApp {
         batteryText = new JLabel("Battery:");
         addComponent(frame, batteryText, 4, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
 
-        
         ipLabel = new JLabel();
         ipLabel.setText(mode);
         addComponent(frame, ipLabel, 1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
@@ -308,7 +304,6 @@ public class CameraApp {
         startButton.addActionListener(startAction);
         stopButton.addActionListener(stopAction);
         connectButton.addActionListener(connectAction);
-        
         frame.setSize(480, 180);
         frame.setResizable(false);   
         //frame.pack();

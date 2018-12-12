@@ -1,14 +1,18 @@
-package TCPConnection;
 /**
-* Class to obtain IP address of the android phone from the arp table when running on ad-hoc network
-* @author Matt Wynyard October 2018
-* @version 1.0
-*/
+ * Copyright 2018 - Onsite Developments
+ * @author Matt Wynyard November 2018
+ * @version 0.2
+ */
+
+package TCPConnection;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+/**
+ * Class to obtain IP address of the android phone from the arp table when running on ad-hoc network
+ */
 class ArpUtility {
 
     String out;  
