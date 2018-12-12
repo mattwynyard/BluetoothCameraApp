@@ -2,7 +2,7 @@
   <artifact type="jar" name="IntelliJ_CameraApp:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/IntelliJ_CameraApp_jar</output-path>
     <root id="archive" name="IntelliJ_CameraApp.jar">
-      <element id="module-output" name="IntelliJ_CameraApp" />
+      <element id="module-output" name="IntelliJ_CameraController_v2.0" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/bluecove-2.1.1.jar" path-in-jar="/" />
     </root>
   </artifact>

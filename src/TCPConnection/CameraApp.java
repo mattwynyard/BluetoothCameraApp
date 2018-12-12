@@ -6,7 +6,6 @@
 
 package TCPConnection;
 
-
 import java.awt.*;
 import java.io.*;
 import java.util.*;
@@ -17,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import Bluetooth.BluetoothManager;
+//import TCPConnection.HTTPServer;
 
 /**
  * Main application class for CameraApp
@@ -54,18 +54,18 @@ public class CameraApp {
     private Scanner sc;
 
     private static String ip;
-    public static CameraApp App;
+    //public static final CameraApp App = ;
+    public static final CameraApp App = new CameraApp();
     private static boolean connected = false;
     private static boolean recording = false;
     private static String status;
     private static boolean DEBUG = true;
     private static String mode;
     private static BluetoothManager mBluetooth;
+    private static TCPServer mTCP;
     private static int flag = 0;
     
     public static void main(String[] args) throws IOException {
-   	
-        App = new CameraApp();
 
         mode = "Bluetooth";
         ipLabel.setText(mode);
@@ -75,32 +75,10 @@ public class CameraApp {
 //        }
         
         mBluetooth = new BluetoothManager();
-        mBluetooth.start();
         new Thread(Flash).start();
+        mBluetooth.start();
 
-        //System.out.println("Hello from main");  
     }
-
-//    public static void connectCommand() {
-//        if (connected == true) {
-//            return;
-//        } else {
-//            //get ip address
-//            if (!DEBUG) {
-//                ArpUtility arp = new ArpUtility();
-//                ip = arp.getIPAddress();
-//            } else {
-//                ip = "127.0.0.1";
-//            }
-//            //connect to server
-//            if (ip != "error") {
-//                System.out.println("connecting to: " + ip);
-//                mClient = new Client(ip, 38300);
-//            } else {
-//                setStatusLabel("No Network");
-//            }
-//        }
-//    }
 
     private static Runnable Flash = new Runnable() {
         @Override
@@ -112,7 +90,7 @@ public class CameraApp {
                     flag = 1;
                     try {
                         Thread.sleep(1000);
-                        System.out.println("Thread sleeping");
+                        //System.out.println("Thread sleeping");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -196,7 +174,7 @@ public class CameraApp {
         }
     }
 
-    public static void setRecording(boolean state) {
+    public synchronized static void setRecording(boolean state) {
         recording = state;
         if (recording == true) {
             cameraLabel.setText("Recording");
@@ -247,8 +225,7 @@ public class CameraApp {
     
 	private CameraApp() {
 
-        JFrame frame = new JFrame();     
-	
+        JFrame frame = new JFrame();
 		//make sure the program exits when the frame closes
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("OnSite Recording Controller");
@@ -269,7 +246,6 @@ public class CameraApp {
         batteryText = new JLabel("Battery:");
         addComponent(frame, batteryText, 4, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
 
-        
         ipLabel = new JLabel();
         ipLabel.setText(mode);
         addComponent(frame, ipLabel, 1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, 0, 0);
@@ -308,7 +284,6 @@ public class CameraApp {
         startButton.addActionListener(startAction);
         stopButton.addActionListener(stopAction);
         connectButton.addActionListener(connectAction);
-        
         frame.setSize(480, 180);
         frame.setResizable(false);   
         //frame.pack();

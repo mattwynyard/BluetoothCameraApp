@@ -1,10 +1,10 @@
-package TCPConnection;
 /**
-* Initializes a client socket connection on the IP address and port number supplied.
-* Then handles incoming and outgoing messages to Android phone server 
-* @author Matt Wynyard October 2018
-* @version 1.0
-*/
+ * Copyright 2018 - Onsite Developments
+ * @author Matt Wynyard November 2018
+ * @version 0.2
+ */
+
+package TCPConnection;
 
 import java.net.Socket;
 import java.io.PrintWriter;
@@ -12,7 +12,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
-
+/**
+ * Initializes a client socket connection on the IP address and port number supplied.
+ * Then handles incoming and outgoing messages to Android phone server
+ */
 public class Client {
 
     private Socket socket;
