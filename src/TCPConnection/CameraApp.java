@@ -1,7 +1,7 @@
 /**
  * Copyright 2018 - Onsite Developments
  * @author Matt Wynyard November 2018
- * @version 0.2
+ * @version 1.1
  */
 
 package TCPConnection;

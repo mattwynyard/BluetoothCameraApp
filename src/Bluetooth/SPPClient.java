@@ -17,7 +17,6 @@ import java.util.Scanner;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import TCPConnection.CameraApp;
-import TCPConnection.TCPServer;
 
 
 public class SPPClient extends Thread {
@@ -29,11 +28,9 @@ public class SPPClient extends Thread {
 	private InputStream in;
 	private PrintWriter writer;
 	private BufferedReader reader;
-	private TCPServer mTCP;
 	
 	public SPPClient(String connectionURL) {
 		this.connectionURL = connectionURL;
-
         try {
 			mStreamConnection = (StreamConnection) Connector.open(connectionURL);
 			if (mStreamConnection != null) {
@@ -55,6 +52,7 @@ public class SPPClient extends Thread {
     }
 
 	public void run() {
+		//System.out.println("Hello from thread");
 		if (connected) {
 			System.out.println("Connection succesful...");
 		}
@@ -64,9 +62,8 @@ public class SPPClient extends Thread {
             //can cause null pointer exception in Thread-2 if instance of app already running
 			out = mStreamConnection.openOutputStream();
 			writer = new PrintWriter(new OutputStreamWriter(out));
-            mTCP = new TCPServer();
-			new Thread(readFromServer).start(); //start listening for messages from phone
-
+			new Thread(readFromServer).start();
+            new Thread(readFromStdIn).start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (NullPointerException e1) {
@@ -75,17 +72,17 @@ public class SPPClient extends Thread {
         }
 	}
 
-//	private Runnable readFromStdIn = new Runnable() {
-//        @Override
-//        public void run() {
-//            String buffer;
-//            Scanner scanner = new Scanner(System.in);
-//            while (scanner.hasNextLine()) {
-//                String input = scanner.nextLine();
-//                System.out.println(input);
-//            }
-//        }
-//    };
+	private Runnable readFromStdIn = new Runnable() {
+        @Override
+        public void run() {
+            String buffer;
+            Scanner scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
+                String input = scanner.nextLine();
+                System.out.println(input);
+            }
+        }
+    };
 	/**
      * Runnable that will read from the server on a thread
      */
@@ -94,7 +91,6 @@ public class SPPClient extends Thread {
         public void run() {
             try {
                 String buffer;
-
                 System.out.println("Reading From Server"); 
                 in = mStreamConnection.openInputStream();
                 reader = new BufferedReader(new InputStreamReader(in));
@@ -103,37 +99,29 @@ public class SPPClient extends Thread {
                     if (buffer.contains("NOTRECORDING")) {
                         CameraApp.setRecording(false);
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                     } else if (buffer.contains("RECORDING")) {
                         CameraApp.setRecording(true);
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                     } else if (buffer.contains("CONNECTED")) {
                         CameraApp.setStatus("CONNECTED");
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                     } else if (buffer.contains("HOME:")) {
                         if (buffer.contains("DESTROYED") || buffer.contains("DETACHED")) {
                             //System.out.println(buffer);
-                            mTCP.sendData(buffer);
                             CameraApp.setStatus("NOTCONNECTED");
                             CameraApp.setRecording(false);
                         }
                     } else if (buffer.contains(".jpg")) {
-                        ///System.out.println(buffer);
-                        mTCP.sendData(buffer);
+                        System.out.println(buffer);
                         CameraApp.setPhotoLabel(buffer.substring(12));
                     } else if (buffer.contains("B:")) {
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                         CameraApp.setBatteryLabel(buffer.substring(2));
                     } else if (buffer.contains("M:")) {
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                         CameraApp.setMemoryLabel(buffer.substring(2));
                     } else if (buffer.contains("APP: Crash")){
                         //System.out.println(buffer);
-                        mTCP.sendData(buffer);
                         CameraApp.setRecording(false);
                         CameraApp.setConnected(false);
                     }   else {
