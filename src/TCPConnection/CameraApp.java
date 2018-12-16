@@ -78,6 +78,19 @@ public class CameraApp {
         new Thread(Flash).start();
         mBluetooth.start();
 
+        //final Thread Shutdown = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                Flash = null;
+                mBluetooth.mClient.mTCP.sendData("NOTRECORDING");
+                mBluetooth.mClient.mTCP.sendData("NOTCONNECTED");
+                mBluetooth.mClient.mTCP.sendData("ERROR");
+                mBluetooth.mClient.mTCP.closeAll();
+                mBluetooth.mClient.closeAll();
+
+            }
+        });
+
     }
 
     private static Runnable Flash = new Runnable() {

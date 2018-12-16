@@ -31,7 +31,7 @@ public class BluetoothManager implements DiscoveryListener {
     //vector containing the devices discovered, kept as Vector in case we need to a more remote devices
 	private Vector<RemoteDevice> mDevices = new Vector();
 	private String connectionURL = null;
-	private SPPClient mClient;
+	public SPPClient mClient;
 
 	private long start;
 	private long stop;

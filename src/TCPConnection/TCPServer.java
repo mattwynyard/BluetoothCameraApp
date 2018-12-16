@@ -21,14 +21,13 @@ public class TCPServer {
     private ServerSocket server;
     private Socket client;
     private Thread mReadThread;
-    private PrintWriter out;
     private PrintWriter writer;
 
     public TCPServer() {
         try {
             // create the main server socket
             server = new ServerSocket(38200, 0, InetAddress.getByName(null));
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("Error: " + e);
             return;
         }
@@ -43,7 +42,7 @@ public class TCPServer {
             client = server.accept();
             // remote is now the connected socket
             System.out.println("Connection, sending data.");
-            out = new PrintWriter(client.getOutputStream());
+            writer = new PrintWriter(client.getOutputStream());
 
             mReadThread = new Thread(readFromClient);
             mReadThread.setPriority(Thread.MAX_PRIORITY);
@@ -58,11 +57,30 @@ public class TCPServer {
 
     }
 
-
+    /** Sends a message to the client, in this case VBA via C# .dll
+     *
+     * @param message - the message to be sent.
+     */
     public void sendData(String message) {
         System.out.println(message);
-        out.println(message);
-        out.flush();
+        writer.println(message);
+        writer.flush();
+    }
+
+    /**
+     * Called from shutdown hookup to fail gracefully
+     */
+    public void closeAll() {
+        try {
+            writer.close();
+            in.close();
+            server.close();
+            client.close();
+            writer = null;
+            mReadThread = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     /**
      * To run in the background,  reads in comming data
