@@ -82,8 +82,6 @@ public class BluetoothManager implements DiscoveryListener {
 				mAgent.startInquiry(DiscoveryAgent.LIAC, this);
 			} catch (BluetoothStateException e){
 				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 				enquiryLock.wait();
 			}
